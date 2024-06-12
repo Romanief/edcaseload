@@ -186,3 +186,30 @@ class LoginViewTestCase(TestCase):
         })
         self.assertRedirects(response, reverse(
             'edcaseload:get_active_patients'))
+
+
+class RegisterViewTestCase(TestCase):
+    def setUp(self):
+        self.client = Client()
+
+    def test_register_get(self):
+        """
+        Test that the registration page is rendered on GET request
+        """
+        response = self.client.get(reverse('edcaseload:register'))
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'edcaseload/register.html')
+
+    def test_register_post(self):
+        """
+        Test that a new user is created and authenticated on POST request
+        """
+        response = self.client.post(reverse('edcaseload:register'), {
+            'username': 'newuser',
+            'password': 'newpassword',
+            'repeat_password': 'newpassword',
+            'email': 'newuser@example.com'
+        })
+        self.assertRedirects(response, reverse(
+            'edcaseload:get_active_patients'))
+        self.assertTrue(User.objects.filter(username='newuser').exists())
