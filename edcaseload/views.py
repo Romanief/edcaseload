@@ -228,4 +228,5 @@ def logout(request):
     logs out a user
     """
     d_logout(request)
-    return redirect(reverse("edcaseload:login"))
+    context = {"success": "Logged out"}
+    return render(request, "edcaseload/login.html", context)
