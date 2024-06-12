@@ -129,3 +129,34 @@ class ReferPatientViewTestCase(TestCase):
         self.assertRedirects(response, reverse(
             "edcaseload:get_active_patients"))
         self.assertTrue(Patient.objects.filter(mrn='789012').exists())
+
+
+class DischargePatientViewTestCase(TestCase):
+    def setUp(self):
+        self.client = Client()
+        self.user = User.objects.create_user(
+            username='testuser', password='testpassword')
+
+        # Create a patient for testing
+        self.patient1 = Patient.objects.create(
+            first_name='John',
+            last_name='Doe',
+            mrn='123456',
+            borough='Brooklyn',
+            doa=timezone.now(),
+            location='Hospital A',
+            priority=1,
+            discharged_therapies=None
+        )
+
+    def test_discharge_patient(self):
+        """
+        Test that a patient is discharged on a POST request
+        """
+        self.client.login(username='testuser', password='testpassword')
+        response = self.client.post(
+            reverse("edcaseload:discharge"), {"mrn": "123456"})
+        self.assertRedirects(response, reverse(
+            'edcaseload:get_active_patients'))
+        self.patient1.refresh_from_db()
+        self.assertIsNotNone(self.patient1.discharged_therapies)
