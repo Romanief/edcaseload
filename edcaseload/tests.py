@@ -261,3 +261,19 @@ class UpdatePatientViewTestCase(TestCase):
             'edcaseload:get_active_patients'))
         self.patient1.refresh_from_db()
         self.assertEqual(self.patient1.first_name, 'Updated')
+
+
+class LogoutViewTestCase(TestCase):
+    def setUp(self):
+        self.client = Client()
+        self.user = User.objects.create_user(
+            username='testuser', password='testpassword')
+
+    def test_logout(self):
+        """ 
+        Test that the user is logged out and redirected to the login page
+        """
+        self.client.login(username='testuser', password='testpassword')
+        response = self.client.get(reverse('edcaseload:logout'))
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'edcaseload/login.html')
