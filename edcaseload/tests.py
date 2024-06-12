@@ -98,3 +98,34 @@ class GetActivePatientsViewTestCase(TestCase):
         """
         response = self.client.get(reverse("edcaseload:get_active_patients"))
         self.assertRedirects(response, reverse("edcaseload:login"))
+
+
+class ReferPatientViewTestCase(TestCase):
+    def setUp(self):
+        self.client = Client()
+        self.user = User.objects.create_user(
+            username='testuser', password='testpassword')
+
+    def test_refer_patient_get(self):
+        """
+        Tests that on get request the refer template is being rendered
+        """
+        response = self.client.get(reverse('edcaseload:refer_patient'))
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "edcaseload/refer.html")
+
+    def test_refer_patient_post(self):
+        """
+        Tests that on correct post request a new patient is created 
+        """
+        response = self.client.post(reverse('edcaseload:refer_patient'), {
+            'first': 'New',
+            'last': 'Patient',
+            'mrn': '789012',
+            'borough': 'Manhattan',
+            'doa': timezone.now(),
+            'location': 'Hospital C'
+        })
+        self.assertRedirects(response, reverse(
+            "edcaseload:get_active_patients"))
+        self.assertTrue(Patient.objects.filter(mrn='789012').exists())
