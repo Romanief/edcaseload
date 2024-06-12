@@ -114,20 +114,30 @@ def login(request):
     """
     if request.method == "GET":
 
+        # if user already logged in redirect to active caseload
         if request.user.is_authenticated:
             return redirect(reverse("edcaseload:get_active_patients"))
         return render(request, "edcaseload/login.html")
 
     elif request.method == "POST":
+        # Get credential from form
         username = request.POST["username"]
         password = request.POST["password"]
 
+        # Attempt to validate user
         try:
             user = authenticate(request, username=username, password=password)
         except:
-            return HttpResponse("invalid credentials")
+            context = {"message": "Something went wrong, try again later"}
+            return render(request, "edcaseload/login.html", context)
 
-        d_login(request, user)
+        # Attempt to login
+        try:
+            d_login(request, user)
+        except:
+            # Return error 403
+            context = {"message": "Invalid credentials"}
+            return render(request, "edcaseload/login.html", context)
 
         return redirect(reverse("edcaseload:get_active_patients"))
 
@@ -142,21 +152,30 @@ def register(request):
         return render(request, "edcaseload/register.html")
 
     elif request.method == "POST":
+        # Gather form inputs
         username = request.POST["username"]
         password = request.POST["password"]
         repeat = request.POST["repeat_password"]
         email = request.POST["email"]
 
+        # Check form is complete in full
         if not username or not password or not repeat or not email:
-            return HttpResponse("invalid form")
+            context = {"message": "Please complete form in full"}
+            return render(request, "edcaseload/register.html", context)
+        # Check that passwords match
         if password != repeat:
-            return HttpResponse("passwords do not match")
+            context = {"message": "Password do not match"}
+            return render(request, "edcaseload/register.html", context)
 
+        # Create and save user
         user = User.objects.create(
             username=username, password=password, email=email)
         user.save()
+
+        # Login user
         user = authenticate(request, username=username, password=password)
         d_login(request, user)
+
         return redirect(reverse("edcaseload:get_active_patients"))
 
 
