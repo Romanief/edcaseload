@@ -160,3 +160,29 @@ class DischargePatientViewTestCase(TestCase):
             'edcaseload:get_active_patients'))
         self.patient1.refresh_from_db()
         self.assertIsNotNone(self.patient1.discharged_therapies)
+
+
+class LoginViewTestCase(TestCase):
+    def setUp(self):
+        self.client = Client()
+        self.user = User.objects.create_user(
+            username='testuser', password='testpassword')
+
+    def test_login_get(self):
+        """
+        Test that the login page is rendered on GET request
+        """
+        response = self.client.get(reverse('edcaseload:login'))
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'edcaseload/login.html')
+
+    def test_login_post(self):
+        """
+        Test that a user is authenticated and redirected on POST request
+        """
+        response = self.client.post(reverse('edcaseload:login'), {
+            'username': 'testuser',
+            'password': 'testpassword'
+        })
+        self.assertRedirects(response, reverse(
+            'edcaseload:get_active_patients'))
