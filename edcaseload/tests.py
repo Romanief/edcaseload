@@ -213,3 +213,51 @@ class RegisterViewTestCase(TestCase):
         self.assertRedirects(response, reverse(
             'edcaseload:get_active_patients'))
         self.assertTrue(User.objects.filter(username='newuser').exists())
+
+
+class UpdatePatientViewTestCase(TestCase):
+    def setUp(self):
+        self.client = Client()
+        self.user = User.objects.create_user(
+            username='testuser', password='testpassword')
+
+        # Create a patient for testing
+        self.patient1 = Patient.objects.create(
+            first_name='John',
+            last_name='Doe',
+            mrn='123456',
+            borough='Brooklyn',
+            doa=timezone.now(),
+            location='Hospital A',
+            priority=1,
+            discharged_therapies=None
+        )
+
+    def test_update_patient_get(self):
+        """
+        Test that the update form is rendered on GET request
+        """
+        self.client.login(username='testuser', password='testpassword')
+        response = self.client.get(
+            reverse('edcaseload:update', args=['123456']))
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'edcaseload/update.html')
+
+    def test_update_patient_post(self):
+        """
+        Test that a patient's details are updated on POST request
+        """
+        self.client.login(username='testuser', password='testpassword')
+        response = self.client.post(reverse('edcaseload:update', args=['123456']), {
+            'mrn': '123456',
+            'first': 'Updated',
+            'last': 'Patient',
+            'borough': 'Bronx',
+            'location': 'Hospital D',
+            'priority': 2,
+            'contact_time': '10:00'
+        })
+        self.assertRedirects(response, reverse(
+            'edcaseload:get_active_patients'))
+        self.patient1.refresh_from_db()
+        self.assertEqual(self.patient1.first_name, 'Updated')
