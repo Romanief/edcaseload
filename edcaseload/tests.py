@@ -1,7 +1,8 @@
 from django.utils import timezone
 from django.test import TestCase, Client
 from django.urls import reverse
-from .models import User, Patient
+from .models import Patient
+from django.contrib.auth.models import User
 
 # Create your tests here.
 
@@ -9,7 +10,7 @@ from .models import User, Patient
 class GetPatientsViewTestCase(TestCase):
     def setUp(self):
         self.client = Client()
-        self.user = User.object.create(
+        self.user = User.objects.create(
             username="test_user", password="test_password")
 
         # create patient for testing
@@ -19,6 +20,7 @@ class GetPatientsViewTestCase(TestCase):
             mrn='123456',
             borough='Brooklyn',
             doa=timezone.now(),
+            dor=timezone.now(),
             location='Hospital A',
             priority=1,
             discharged_therapies=None
@@ -29,6 +31,7 @@ class GetPatientsViewTestCase(TestCase):
             mrn='654321',
             borough='Queens',
             doa=timezone.now(),
+            dor=timezone.now(),
             location='Hospital B',
             priority=2,
             discharged_therapies=timezone.now()
@@ -56,7 +59,7 @@ class GetPatientsViewTestCase(TestCase):
 class GetActivePatientsViewTestCase(TestCase):
     def setUp(self):
         self.client = Client()
-        self.user = User.object.create(
+        self.user = User.objects.create(
             username="test_user", password="test_password")
 
         # create patient for testing
@@ -66,6 +69,7 @@ class GetActivePatientsViewTestCase(TestCase):
             mrn='123456',
             borough='Brooklyn',
             doa=timezone.now(),
+            dor=timezone.now(),
             location='Hospital A',
             priority=1,
             discharged_therapies=None
@@ -76,6 +80,7 @@ class GetActivePatientsViewTestCase(TestCase):
             mrn='654321',
             borough='Queens',
             doa=timezone.now(),
+            dor=timezone.now(),
             location='Hospital B',
             priority=2,
             discharged_therapies=timezone.now()
@@ -110,7 +115,7 @@ class ReferPatientViewTestCase(TestCase):
         """
         Tests that on get request the refer template is being rendered
         """
-        response = self.client.get(reverse('edcaseload:refer_patient'))
+        response = self.client.get(reverse('edcaseload:refer'))
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, "edcaseload/refer.html")
 
@@ -118,12 +123,12 @@ class ReferPatientViewTestCase(TestCase):
         """
         Tests that on correct post request a new patient is created 
         """
-        response = self.client.post(reverse('edcaseload:refer_patient'), {
+        response = self.client.post(reverse('edcaseload:refer'), {
             'first': 'New',
             'last': 'Patient',
             'mrn': '789012',
             'borough': 'Manhattan',
-            'doa': timezone.now(),
+            'doa': "2000-01-27",
             'location': 'Hospital C'
         })
         self.assertRedirects(response, reverse(
@@ -144,6 +149,7 @@ class DischargePatientViewTestCase(TestCase):
             mrn='123456',
             borough='Brooklyn',
             doa=timezone.now(),
+            dor=timezone.now(),
             location='Hospital A',
             priority=1,
             discharged_therapies=None
@@ -228,6 +234,7 @@ class UpdatePatientViewTestCase(TestCase):
             mrn='123456',
             borough='Brooklyn',
             doa=timezone.now(),
+            dor=timezone.now(),
             location='Hospital A',
             priority=1,
             discharged_therapies=None
@@ -255,7 +262,7 @@ class UpdatePatientViewTestCase(TestCase):
             'borough': 'Bronx',
             'location': 'Hospital D',
             'priority': 2,
-            'contact_time': '10:00'
+            'contact_time': '1000'
         })
         self.assertRedirects(response, reverse(
             'edcaseload:get_active_patients'))
