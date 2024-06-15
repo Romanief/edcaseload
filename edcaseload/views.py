@@ -42,10 +42,15 @@ def get_active_patients(request):
     """
     if not request.user.is_authenticated:
         return redirect(reverse("edcaseload:login"))
+    print("AAAAAA")
 
     patients = Patient.objects.all()
+    print("bbbb")
+    print(patients)
+
     context = {"patients": [
         patient for patient in patients if not patient.isDischarged()]}
+    print("CCCCC")
 
     return render(request, "edcaseload/caseload.html", context)
 
