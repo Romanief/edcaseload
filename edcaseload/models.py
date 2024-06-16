@@ -4,52 +4,64 @@ from django.utils import timezone
 # Create your models here.
 
 BOROUGHS = [
-    ("GRE", "Greenwich"),
-    ("BEX", "Bexley"),
-    ("LEW", "Lewisham"),
-    ("HOM", "Homerton"),
-    ("OOB", "Out of borough")
+    ("Greenwich", "Greenwich"),
+    ("Bexley", "Bexley"),
+    ("Lewisham", "Lewisham"),
+    ("Homerton", "Homerton"),
+    ("Out of borough", "Out of borough")
 ]
 SPECIALITIES = [
-    ("CAR", "Cardiology"),
-    ("COE", "Geriatric"),
-    ("PED", "Paediatric"),
-    ("ONC", "Oncology"),
-    ("ORT", "Orthopaedic"),
-    ("NEU", "Neurology"),
-    ("RES", "Respiratory")
+    ("Cardiology", "Cardiology"),
+    ("Geriatric", "Geriatric"),
+    ("Paediatric", "Paediatric"),
+    ("Oncology", "Oncology"),
+    ("Orthopaedic", "Orthopaedic"),
+    ("Neurology", "Neurology"),
+    ("Respiratory", "Respiratory")
 ]
 REASONS = [
-    ("FAL", "Fall"),
-    ("NEU", "Neuro"),
-    ("GEN", "Generally unwell"),
-    ("MEH", "Mental health"),
-    ("ORT", "Orthopaedic"),
-    ("RES", "Respiratory")
+    ("Fall", "Fall"),
+    ("Neuro", "Neuro"),
+    ("Generally unwell", "Generally unwell"),
+    ("Mental Health", "Mental health"),
+    ("Orthopaedic", "Orthopaedic"),
+    ("Respiratory", "Respiratory")
 ]
-LOCATION = [
-    ("HOM", "Home"),
-    ("WAR", "Ward"),
-    ("ICB", "Rehab unit"),
-    ("PLC", "Placement")
+LOCATIONS = [
+    ("Home", "Home"),
+    ("Ward", "Ward"),
+    ("Rehab unit", "Rehab unit"),
+    ("Placement", "Placement")
 ]
 
 
 class Doctor(models.Model):
-    name: models.CharField(max_length=50)
-    speciality: models.CharField(max_length=50, default="COE")
+    name = models.CharField(max_length=50)
+    speciality = models.CharField(max_length=50, choices=SPECIALITIES)
+
+    def __str__(self):
+        return self.name
 
 
 class AdmissionReason(models.Model):
-    reason: models.CharField(max_length=50, default="FAL")
+    reason = models.CharField(max_length=50, choices=REASONS)
+    
+    def __str__(self):
+        return self.reason
 
 
 class Borough(models.Model):
-    Borough: models.CharField(max_length=20, default="GRE")
+    borough = models.CharField(max_length=20, choices=BOROUGHS)
+
+    def __str__(self):
+        return self.borough
 
 
 class Discharge_locations(models.Model):
-    location: models.CharField(max_length=20, default="HOM")
+    location = models.CharField(max_length=20, choices=LOCATIONS)
+
+    def __str__(self):
+        return self.location
 
 
 class Patient(models.Model):
@@ -66,14 +78,10 @@ class Patient(models.Model):
     ward = models.IntegerField(blank=True, null=True)
     contact_time = models.IntegerField(default=0)
 
-    borough = models.ForeignKey(
-        Borough, on_delete=models.CASCADE)
-    doctor = models.ForeignKey(
-        Doctor, on_delete=models.CASCADE, blank=True, null=True)
-    reason = models.ForeignKey(
-        AdmissionReason, on_delete=models.CASCADE)
-    discharge_destination = models.ForeignKey(
-        Discharge_locations, on_delete=models.CASCADE)
+    borough = models.ForeignKey(Borough, on_delete=models.CASCADE, default=1)
+    doctor = models.ForeignKey(Doctor, on_delete=models.CASCADE, blank=True, null=True)
+    reason = models.ForeignKey(AdmissionReason, on_delete=models.CASCADE, default=1)
+    discharge_destination = models.ForeignKey(Discharge_locations, on_delete=models.CASCADE, default=1)
 
     def __str__(self):
         return f"{self.last_name}, {self.first_name}"
