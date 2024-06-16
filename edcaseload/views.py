@@ -14,13 +14,10 @@ def index(request):
     """
     Returns a list containing all different links for the app
     """
-    link_list = ["/get_patients", "/get_patients/[mrn]",
-                 "/get_active_patients", "/refer"]
-    data = {"links": []}
-    for link in link_list:
-        data["links"].append(link)
-
-    return JsonResponse(data)
+    if request.user.is_authenticated:
+        return redirect(reverse("edcaseload:get_active_patients"))
+    
+    return redirect(reverse("edcaseload:login"))
 
 
 def get_patients(request):
@@ -219,6 +216,12 @@ def update(request, mrn):
         location = request.POST["location"]
         priority = request.POST["priority"]
         contact_time = request.POST["contact_time"]
+
+        try:
+            borough = Borough.objects.get(borough=borough)
+        except:
+            context = {"message": "Please complete all fields"}
+            return render(request, "edcaseload/refer.html", context)
 
         patient.first_name = first_name
         patient.last_name = last_name
