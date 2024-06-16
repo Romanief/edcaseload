@@ -5,7 +5,7 @@ from django.utils import timezone
 from django.contrib.auth import authenticate, login as d_login, logout as d_logout
 from django.contrib.auth.models import User
 
-from .models import Patient
+from .models import Patient, Borough, Discharge_locations, Doctor
 
 # Create your views here.
 
@@ -42,15 +42,11 @@ def get_active_patients(request):
     """
     if not request.user.is_authenticated:
         return redirect(reverse("edcaseload:login"))
-    print("AAAAAA")
 
     patients = Patient.objects.all()
-    print("bbbb")
-    print(patients)
 
     context = {"patients": [
         patient for patient in patients if not patient.isDischarged()]}
-    print("CCCCC")
 
     return render(request, "edcaseload/caseload.html", context)
 
@@ -66,11 +62,18 @@ def refer_patient(request):
         first_name = request.POST["first"]
         last_name = request.POST["last"]
         mrn = request.POST["mrn"]
-        borough = request.POST["borough"]
         doa = request.POST["doa"]
         location = request.POST["location"]
         dor = timezone.now()
         priority = 1
+
+        try: 
+            borough = request.POST["borough"]
+            borough = Borough.objects.get(borough=borough)
+        except:
+            context = {"message": "Please complete all fields"}
+            return render(request, "edcaseload/refer.html", context)
+        
 
         patient = Patient.objects.create(
             first_name=first_name,
@@ -219,7 +222,7 @@ def update(request, mrn):
 
         patient.first_name = first_name
         patient.last_name = last_name
-        patient.borough = borough
+        patient.borough = Borough.objects.get(borough=borough)
         patient.location = location
         patient.priority = priority
         patient.contact_time = contact_time
