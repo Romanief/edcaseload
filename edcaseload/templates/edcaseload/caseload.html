@@ -67,14 +67,14 @@
                     {{ patient.contact_time }}
                 </td>
                 <td class="flex items-center px-6 py-4">
+                    {% if not patient.discharged_therapies %}
                     <form action="{% url 'edcaseload:discharge' %}" method="post">
                         {% csrf_token %}
                         <input type="hidden" value={{patient.mrn}} name="mrn"/>
                         <a href="{% url 'edcaseload:update' patient.mrn %}" class="font-medium text-blue-600 dark:text-blue-500 hover:underline">Edit</a>
-                        {% if not patient.discharged_therapies %}
                         <input type="submit" value="Discharge" class="font-medium text-red-600 dark:text-red-500 hover:underline ms-3"></input>
-                        {% endif %}
                     </form>
+                    {% endif %}
                 </td>
             </tr>
         {% endfor %}
