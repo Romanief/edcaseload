@@ -1,0 +1,23 @@
+[
+	{
+		"model": "edcaseload.Referral",
+		"pk": 1,
+		"fields": {
+			"status": "Pending"
+		}
+	},
+	{
+		"model": "edcaseload.Referral",
+		"pk": 2,
+		"fields": {
+			"status": "Accepted"
+		}
+	},
+	{
+		"model": "edcaseload.Referral",
+		"pk": 1,
+		"fields": {
+			"status": "Rejected"
+		}
+	}
+]

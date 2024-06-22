@@ -5,7 +5,7 @@ from django.utils import timezone
 from django.contrib.auth import authenticate, login as d_login, logout as d_logout
 from django.contrib.auth.models import User
 
-from .models import Patient, Borough, Discharge_locations, Doctor
+from .models import Patient, Borough, Discharge_location, Doctor
 
 # Create your views here.
 

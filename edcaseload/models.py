@@ -3,6 +3,7 @@ from django.utils import timezone
 
 # Create your models here.
 
+
 BOROUGHS = [
     ("Greenwich", "Greenwich"),
     ("Bexley", "Bexley"),
@@ -33,6 +34,11 @@ LOCATIONS = [
     ("Rehab unit", "Rehab unit"),
     ("Placement", "Placement")
 ]
+REFERRALS_STATUS = [
+    ("Pending", "Pending"),
+    ("Accepted", "Accepted"),
+    ("Rejected", "Rejected")
+]
 
 
 class Doctor(models.Model):
@@ -57,11 +63,26 @@ class Borough(models.Model):
         return self.borough
 
 
-class Discharge_locations(models.Model):
+class Discharge_location(models.Model):
     location = models.CharField(max_length=20, choices=LOCATIONS)
 
     def __str__(self):
         return self.location
+
+
+# class Referral(models.Model):
+#     status = models.CharField(max_length=20, choices=REFERRALS_STATUS)
+
+#     def accept_referral(self): 
+#         if self.status != "Pending": return print("Invalid action")
+#         self.status = "Accepted"
+    
+#     def reject_referral(self):   
+#         if self.status != "Pending": return print("Invalid action")
+#         self.status = "Rejected"
+
+#     def __str__(self):
+#         return self.status
 
 
 class Patient(models.Model):
@@ -81,10 +102,17 @@ class Patient(models.Model):
     borough = models.ForeignKey(Borough, on_delete=models.CASCADE, default=1)
     doctor = models.ForeignKey(Doctor, on_delete=models.CASCADE, blank=True, null=True)
     reason = models.ForeignKey(AdmissionReason, on_delete=models.CASCADE, default=1)
-    discharge_destination = models.ForeignKey(Discharge_locations, on_delete=models.CASCADE, default=1)
+    discharge_destination = models.ForeignKey(Discharge_location, on_delete=models.CASCADE, default=1)
+    referral = models.CharField(choices=REFERRALS_STATUS, default="Pending", max_length=20)
 
     def __str__(self):
         return f"{self.last_name}, {self.first_name}"
+    
+    def accept_referral(self):
+        self.referral = "Accepted"
+    
+    def reject_referral(self):
+        self.referral = "Rejected"
 
     def isDischarged(self):
         return True if self.discharged_therapies else False
