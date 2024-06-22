@@ -48,6 +48,18 @@ def get_active_patients(request):
     return render(request, "edcaseload/caseload.html", context)
 
 
+def get_pending_referrals(request):
+    """"
+    Return list of pending referrals
+    """
+    if not request.user.is_authenticated:
+        return redirect(reverse("edcaseload:login"))
+    
+    patients = Patient.objects.all().filter(referral="Pending")
+    context = {"patients" : patients}
+
+    return render(request, "edcaseload/caseload.html", context)
+
 def refer_patient(request):
     """
     Render the referral form, as a post request refer a patient into the caseload
