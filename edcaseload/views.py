@@ -40,7 +40,7 @@ def get_active_patients(request):
     if not request.user.is_authenticated:
         return redirect(reverse("edcaseload:login"))
 
-    patients = Patient.objects.all()
+    patients = Patient.objects.all().filter(referral = "Accepted")
 
     context = {"patients": [
         patient for patient in patients if not patient.isDischarged()]}
@@ -52,13 +52,38 @@ def get_pending_referrals(request):
     """"
     Return list of pending referrals
     """
-    if not request.user.is_authenticated:
-        return redirect(reverse("edcaseload:login"))
-    
-    patients = Patient.objects.all().filter(referral="Pending")
-    context = {"patients" : patients}
+    if request.method == "GET":
+        if not request.user.is_authenticated:
+            return redirect(reverse("edcaseload:login"))
+        
+        patients = Patient.objects.all().filter(referral="Pending")
+        context = {"patients" : patients}
 
-    return render(request, "edcaseload/caseload.html", context)
+        return render(request, "edcaseload/pending.html", context)
+
+    elif request.method == "POST":
+        if not request.user.is_authenticated:
+            return redirect(reverse("edcaseload:login"))
+
+        mrn = request.POST["mrn"]
+        status = request.POST["status"]
+
+        try: 
+            patient = Patient.objects.get(mrn = mrn)
+            print(patient)
+        except: 
+            context = {"message": "Patient not found, please refer to service"}
+            return render(request, "edcaseload/refer.html", context)
+        
+        if status == "Accept":
+            patient.accept_referral()
+        elif status == "Reject":
+            patient.reject_referral()
+
+        patient.save()
+        
+        return redirect(reverse("edcaseload:pending"))
+
 
 def refer_patient(request):
     """
